@@ -1,0 +1,190 @@
+@baseUrl = http://localhost:3000
+@email = admin@example.com
+@password = StrongPass123
+
+### Auth: register
+# Agar user oldin yaratilgan bo'lsa 409 qaytadi, keyingi login requestni ishlating.
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "full_name": "Admin User"
+}
+
+### Auth: login
+# Response'dan access_token ni pastdagi @token ga qo'lda ko'chiring.
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Variables: token/id larni shu yerda to'ldiring
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiN2RhNWVkYy1hYTI3LTRhMjctOWVjNC1iOTMyOTdkNWY0OWQiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwiaWF0IjoxNzg3NTU0NzQ1LCJleHAiOjE3ODc2NDExNDV9.5PZExuoGq0MH9bWAx144lOt9oYTTiy6OtkyGsPTa324
+@currentUserId = paste_current_user_id_here
+@targetUserId = paste_target_user_id_here
+@roleId = paste_role_id_here
+@permissionId = paste_permission_id_here
+
+### Auth: me
+GET {{baseUrl}}/api/v1/auth/me
+Authorization: Bearer {{token}}
+
+### Roles: list
+GET {{baseUrl}}/api/v1/rbac/roles?page=1&limit=20
+Authorization: Bearer {{token}}
+
+### Roles: create
+POST {{baseUrl}}/api/v1/rbac/roles
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "loan_admin",
+  "display_name": "Loan Admin"
+}
+
+### Roles: get one with permissions
+GET {{baseUrl}}/api/v1/rbac/roles/{{roleId}}
+Authorization: Bearer {{token}}
+
+### Roles: update PUT
+PUT {{baseUrl}}/api/v1/rbac/roles/{{roleId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "loan_admin",
+  "display_name": "Loan Administrator"
+}
+
+### Roles: update PATCH
+PATCH {{baseUrl}}/api/v1/rbac/roles/{{roleId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "display_name": "Loan Admin"
+}
+
+### Roles: assign permissions
+POST {{baseUrl}}/api/v1/rbac/roles/{{roleId}}/permissions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "permission_ids": ["{{permissionId}}"]
+}
+
+### Roles: remove one permission
+DELETE {{baseUrl}}/api/v1/rbac/roles/{{roleId}}/permissions/{{permissionId}}
+Authorization: Bearer {{token}}
+
+### Roles: delete
+DELETE {{baseUrl}}/api/v1/rbac/roles/{{roleId}}
+Authorization: Bearer {{token}}
+
+### Permissions: list all
+GET {{baseUrl}}/api/v1/rbac/permissions
+Authorization: Bearer {{token}}
+
+### Permissions: filter by module
+GET {{baseUrl}}/api/v1/rbac/permissions?module=loans
+Authorization: Bearer {{token}}
+
+### Permissions: create
+POST {{baseUrl}}/api/v1/rbac/permissions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+11
+### Permissions: update PUT
+PUT {{baseUrl}}/api/v1/rbac/permissions/{{permissionId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "loans.close",
+  "display_name": "Close loans",
+  "module": "loans"
+}
+
+### Permissions: update PATCH
+PATCH {{baseUrl}}/api/v1/rbac/permissions/{{permissionId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "display_name": "Close loan applications"
+}
+
+### Permissions: delete
+DELETE {{baseUrl}}/api/v1/rbac/permissions/{{permissionId}}
+Authorization: Bearer {{token}}
+
+### User roles: get user's roles
+GET {{baseUrl}}/api/v1/rbac/users/{{targetUserId}}/roles
+Authorization: Bearer {{token}}
+
+### User roles: assign roles to user
+POST {{baseUrl}}/api/v1/rbac/users/{{targetUserId}}/roles
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "role_ids": ["{{roleId}}"]
+}
+
+### User roles: remove role from user
+DELETE {{baseUrl}}/api/v1/rbac/users/{{targetUserId}}/roles/{{roleId}}
+Authorization: Bearer {{token}}
+
+### User permissions: effective permissions
+GET {{baseUrl}}/api/v1/rbac/users/{{targetUserId}}/permissions
+Authorization: Bearer {{token}}
+
+### User permissions: override grant
+POST {{baseUrl}}/api/v1/rbac/users/{{targetUserId}}/permissions/override
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "permission_id": "{{permissionId}}",
+  "is_denied": false
+}
+
+### User permissions: override deny
+POST {{baseUrl}}/api/v1/rbac/users/{{targetUserId}}/permissions/override
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "permission_id": "{{permissionId}}",
+  "is_denied": true
+}
+
+### Check access: current JWT user
+GET {{baseUrl}}/api/v1/rbac/check-access?permission=loans.approve
+Authorization: Bearer {{token}}
+
+### Check access: specific user
+GET {{baseUrl}}/api/v1/rbac/check-access?permission=loans.approve&user_id={{targetUserId}}
+Authorization: Bearer {{token}}
+
+### Check access: bulk
+POST {{baseUrl}}/api/v1/rbac/check-access/bulk
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "user_id": "{{targetUserId}}",
+  "permissions": ["loans.approve", "loans.reject", "reports.export"]
+}
+
+### Example protected endpoint
+GET {{baseUrl}}/api/v1/rbac/example/protected
+Authorization: Bearer {{token}}

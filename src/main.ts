@@ -18,6 +18,7 @@ async function bootstrap() {
     .setTitle('NestJS RBAC API')
     .setDescription('Role-Based Access Control module')
     .setVersion('0.1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
